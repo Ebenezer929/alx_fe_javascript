@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dynamic Quote Generator</title>
-  <style>
+   <style>
     body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(to right, #f0f4f8, #d9e2ec);
@@ -80,20 +80,25 @@
 <body>
   <h1>Dynamic Quote Generator</h1>
 
-  <div>
-    <label for="categorySelect">Choose Category:</label>
-    <select id="categorySelect"></select>
-    <button id="newQuote">Show New Quote</button>
-  </div>
+  <!-- Quote Display -->
+  <div id="quoteDisplay"></div>
+  <button id="newQuote">Show New Quote</button>
 
-  <div id="quoteDisplay">Click "Show New Quote" to see a quote.</div>
-
-  <h3>Add a New Quote</h3>
+  <!-- Add Quote -->
   <div>
     <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
     <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
-    <button id="addQuoteBtn">Add Quote</button>
+    <button onclick="addQuote()">Add Quote</button>
   </div>
+
+  <!-- Filter -->
+  <select id="categoryFilter" onchange="filterQuotes()">
+    <option value="all">All Categories</option>
+  </select>
+
+  <!-- Import/Export -->
+  <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
+  <button onclick="exportToJsonFile()">Export Quotes</button>
 
   <script src="script.js"></script>
 </body>
