@@ -1,22 +1,18 @@
 let quotes = [];
 let lastViewedQuote = null;
+let selectedCategory = "all"; // <-- Now explicitly declared
 
 window.onload = function () {
   loadQuotes();
   createAddQuoteForm();
   populateCategories();
+  loadLastSelectedCategory();
   showRandomQuote();
-
-  const lastFilter = localStorage.getItem("lastFilter");
-  if (lastFilter) {
-    document.getElementById("categoryFilter").value = lastFilter;
-    filterQuotes();
-  }
 
   document.getElementById("newQuote").addEventListener("click", showRandomQuote);
 };
 
-// Function to dynamically create the add quote form
+// Create the form dynamically
 function createAddQuoteForm() {
   const formContainer = document.createElement("div");
 
@@ -39,22 +35,21 @@ function createAddQuoteForm() {
   document.body.insertBefore(formContainer, document.getElementById("categoryFilter"));
 }
 
-function showRandomQuote() {
-  const display = document.getElementById("quoteDisplay");
-  const category = document.getElementById("categoryFilter").value;
-  const filtered = category === "all" ? quotes : quotes.filter(q => q.category === category);
-
-  if (filtered.length === 0) {
-    display.textContent = "No quotes found for this category.";
-    return;
-  }
-
-  const random = filtered[Math.floor(Math.random() * filtered.length)];
-  display.textContent = `"${random.text}" (${random.category})`;
-  lastViewedQuote = random;
-  sessionStorage.setItem("lastViewedQuote", JSON.stringify(random));
+// Load from localStorage
+function loadQuotes() {
+  const stored = localStorage.getItem("quotes");
+  quotes = stored ? JSON.parse(stored) : [
+    { text: "The only limit is your mind.", category: "Motivation" },
+    { text: "Be yourself; everyone else is already taken.", category: "Humor" }
+  ];
 }
 
+// Save quotes
+function saveQuotes() {
+  localStorage.setItem("quotes", JSON.stringify(quotes));
+}
+
+// Add quote
 function addQuote() {
   const text = document.getElementById("newQuoteText").value.trim();
   const category = document.getElementById("newQuoteCategory").value.trim();
@@ -67,35 +62,59 @@ function addQuote() {
   quotes.push({ text, category });
   saveQuotes();
   populateCategories();
+
+  // Reset form
   document.getElementById("newQuoteText").value = '';
   document.getElementById("newQuoteCategory").value = '';
+
   alert("Quote added!");
 }
 
-function saveQuotes() {
-  localStorage.setItem("quotes", JSON.stringify(quotes));
+// Show random quote from selected category
+function showRandomQuote() {
+  const display = document.getElementById("quoteDisplay");
+  const filtered = selectedCategory === "all"
+    ? quotes
+    : quotes.filter(q => q.category === selectedCategory);
+
+  if (filtered.length === 0) {
+    display.textContent = "No quotes found for this category.";
+    return;
+  }
+
+  const random = filtered[Math.floor(Math.random() * filtered.length)];
+  display.textContent = `"${random.text}" (${random.category})`;
+  lastViewedQuote = random;
+  sessionStorage.setItem("lastViewedQuote", JSON.stringify(random));
 }
 
-function loadQuotes() {
-  const stored = localStorage.getItem("quotes");
-  quotes = stored ? JSON.parse(stored) : [
-    { text: "The only limit is your mind.", category: "Motivation" },
-    { text: "Be yourself; everyone else is already taken.", category: "Humor" }
-  ];
-}
-
+// Populate category dropdown
 function populateCategories() {
   const filter = document.getElementById("categoryFilter");
   const categories = ["all", ...new Set(quotes.map(q => q.category))];
+
   filter.innerHTML = categories.map(cat =>
-    `<option value="${cat}">${cat}</option>`).join("");
+    `<option value="${cat}" ${cat === selectedCategory ? "selected" : ""}>${cat}</option>`
+  ).join("");
 }
 
+// Handle filter change
 function filterQuotes() {
-  localStorage.setItem("lastFilter", document.getElementById("categoryFilter").value);
+  selectedCategory = document.getElementById("categoryFilter").value;
+  localStorage.setItem("lastFilter", selectedCategory);
   showRandomQuote();
 }
 
+// Load last selected category
+function loadLastSelectedCategory() {
+  const stored = localStorage.getItem("lastFilter");
+  if (stored) {
+    selectedCategory = stored;
+    document.getElementById("categoryFilter").value = selectedCategory;
+  }
+}
+
+// Export quotes
 function exportToJsonFile() {
   const blob = new Blob([JSON.stringify(quotes)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -106,6 +125,7 @@ function exportToJsonFile() {
   URL.revokeObjectURL(url);
 }
 
+// Import quotes
 function importFromJsonFile(event) {
   const fileReader = new FileReader();
   fileReader.onload = function (e) {
