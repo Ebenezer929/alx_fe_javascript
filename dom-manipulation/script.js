@@ -174,3 +174,26 @@ async function fetchQuotesFromServer() {
     console.error("Error syncing with server:", error);
   }
 }
+async function uploadQuotesToServer() {
+  try {
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(quotes)
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to upload quotes");
+    }
+
+    const result = await response.json();
+    console.log("Server response:", result);
+    alert("Quotes uploaded to server (simulated)!");
+  } catch (error) {
+    console.error("Upload error:", error);
+    alert("Failed to upload quotes to server.");
+  }
+}
+
