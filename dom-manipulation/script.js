@@ -145,4 +145,5 @@ function importFromJsonFile(event) {
   };
   fileReader.readAsText(event.target.files[0]);
 }
-
+// Sync with server every 30 seconds
+setInterval(fetchQuotesFromServer, 30000);
