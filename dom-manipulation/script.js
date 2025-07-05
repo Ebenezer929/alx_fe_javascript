@@ -147,3 +147,29 @@ function importFromJsonFile(event) {
 }
 // Sync with server every 30 seconds
 setInterval(fetchQuotesFromServer, 30000);
+// Fetch quotes from a mock server (e.g., JSONPlaceholder)
+function fetchQuotesFromServer() {
+  fetch('https://jsonplaceholder.typicode.com/posts?_limit=5')
+    .then(response => response.json())
+    .then(data => {
+      const serverQuotes = data.map(post => ({
+        text: post.title,
+        category: "Server"
+      }));
+
+      // Avoid duplicates
+      let newQuotes = serverQuotes.filter(sq =>
+        !quotes.some(local => local.text === sq.text)
+      );
+
+      if (newQuotes.length > 0) {
+        quotes.push(...newQuotes);
+        saveQuotes();
+        populateCategories();
+        alert("Quotes synced from server!");
+      }
+    })
+    .catch(error => {
+      console.error("Error fetching quotes from server:", error);
+    });
+}
